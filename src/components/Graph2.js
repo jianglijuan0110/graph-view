@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Graph } from 'react-d3-graph';
-import graphData from './data/graphData';
-import graphConfig from "./graph2Config"
-import './Graph.css';
+import graphData from '../data/graphData';
+import graphConfig from "../data/graph2Config"
+import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
 
 /**

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import IntegratedGraph from './IntegratedGraph';
+import IntegratedGraph from './components/IntegratedGraph';
 
 const App = () => {
   return (

@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Graph } from 'react-d3-graph';
 import { Popover } from 'react-bootstrap';
-import './Graph.css';
+import '../styles/Graph.css';
 
 //import graphData from "./data/marvel/marvel.data"
 //import graphConfig from "./data/marvel/marvel.config"
 
-import graphData from "./data/graphData";
-import graphConfig from "./graph1Config";
+import graphData from "../data/graphData";
+import graphConfig from "../data/graph1Config";
 
-import {useGraphState} from "./utils/GraphState";
+import {useGraphState} from "../utils/GraphState";
 
 
 /**
