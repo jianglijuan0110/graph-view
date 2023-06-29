@@ -1,8 +1,7 @@
 
 # <p align="center">GraphView</p>
-  
-Ce projet propose une interface permettant de visualiser les graphes de propriétés RDF en utilisant la bibliothèque react-d3-graph et Bootstrap en JavaScript. Cette application web permet aux utilisateurs de naviguer entre les graphes qui sont basés sur les mêmes données.
 
+This project offers an interface for visualizing RDF property graphs using the react-d3-graph library and Bootstrap in JavaScript. This web application allows users to navigate between graphs that are based on the same data.
 ## 🛠️ Tech Stack
 - [React](https://reactjs.org/)
 - [React-d3-graph](https://danielcaldas.github.io/react-d3-graph/docs/)

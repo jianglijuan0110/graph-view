@@ -1,22 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Graph } from 'react-d3-graph';
 import { Popover } from 'react-bootstrap';
-import './Graph1.css';
+import './Graph.css';
+
+//import graphData from "./data/marvel/marvel.data"
+//import graphConfig from "./data/marvel/marvel.config"
+
+import graphData from "./data/graphData";
+import graphConfig from "./graph1Config";
+
+import {useGraphState} from "./utils/GraphState";
+
 
 /**
  * Component representing a graph.
  * @returns {JSX.Element} Graph1 component.
  */
 const Graph1 = () => {
-    const [showDirection, setShowDirection] = useState(true);
-    const [showTooltip, setShowTooltip] = useState(false);
-    const [currentNode, setCurrentNode] = useState(null);
-    const [currentLink, setCurrentLink] = useState(null);
-    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-    const graphRef = useRef(null);
-    const popoverNodeRef = useRef(null);
-    const popoverLinkRef = useRef(null);
 
+    // Component state and hooks initialization
     /**
      * Graph data state.
      * @type {Object}
@@ -28,65 +30,73 @@ const Graph1 = () => {
         links: [],
     });
 
-    /**
-     * Configuration object for the graph.
-     * @type {Object}
-     */
-    const graph1Config = {
-        nodeHighlightBehavior: true,
-        renderLabel: true,
-        directed: showDirection, // Use the showDirection state here
-        node: {
-            color: 'lightgreen',
-            size: 120,
-            highlightStrokeColor: 'blue',
-        },
-        link: {
-            highlightColor: 'lightblue',
-            renderlabel: true,
-        },
-    };
+    // Other state variables and hooks initialization
+
+    //const [showDirection, setShowDirection] = useState(graphConfig.directed);
+    const {
+        showTooltip,
+        setShowTooltip,
+        currentNode,
+        setCurrentNode,
+        currentLink,
+        setCurrentLink,
+        tooltipPosition,
+        setTooltipPosition,
+        graphRef,
+        popoverNodeRef,
+        popoverLinkRef,
+    } = useGraphState();
+
 
     /**
      * Toggle the direction of the graph.
      * Updates the showDirection state.
      * @returns {void}
      */
-        //the setShowDirection function is called with a callback function that takes the current value of
-        // showDirection and returns the new state value by inverting it using the ! (logical NOT) operator.
-    const toggleDirection = () => {
-            setShowDirection(showDirection => !showDirection);
-        };
+    //the setShowDirection function is called with a callback function that takes the current value of
+    // newShowDirection and returns the new state value by inverting it using the ! (logical NOT) operator.
+
+    /*const toggleDirection = () => {
+        const newShowDirection = !showDirection;
+        setShowDirection(newShowDirection);
+        graphConfig.directed = newShowDirection; // Update the direction in the config file
+    };*/
+
+
 
     useEffect(() => {
         // Simulate data fetching with a delay
         const fetchData = setTimeout(() => {
-            const newData = {
-                nodes: [
-                    { id: 'indiv_LJ', label: 'lj', color: 'red', size: 600 },
-                    { id: 'lijuan', label: 'firstName' },
-                    { id: 'JIANG', label: 'familyName' },
-                    { id: 'person', label: 'p' },
-                    { id: 'univ_UM', label: 'university', color: 'orange', size: 400 },
-                    { id: 'organization', label: 'o' },
-                    { id: 'Université de Montpellier', label: 'nameU' },
-                ],
-                links: [
-                    { source: 'indiv_LJ', label: 'studiesIn', target: 'univ_UM' },
-                    { source: 'indiv_LJ', label: 'firstName', target: 'lijuan' },
-                    { source: 'indiv_LJ', label: 'familyName', target: 'JIANG' },
-                    { source: 'indiv_LJ', label: 'rdf:type', target: 'person' },
-                    { source: 'univ_UM', label: 'rdf:type', target: 'organization' },
-                    { source: 'univ_UM', label: 'foaf:name', target: 'Université de Montpellier' },
-                ],
-            };
-
-            setData(newData);
+            setData(graphData);
         }, 0);
 
         return () => {
             // Clean up the setTimeout when the component is unmounted
             clearTimeout(fetchData);
+        };
+    }, []);
+
+
+
+    /**
+     * Handles outside click to hide popovers.
+     * @function
+     * @returns {void}
+     */
+    const handleOutsideClick = () => {
+        setShowTooltip(false);
+        setCurrentNode(null);
+        setCurrentLink(null);
+    };
+
+    /**
+     * Effect to hide popovers when clicking outside the graph.
+     */
+    useEffect(() => {
+        document.addEventListener('mousedown', handleOutsideClick);
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, []);
 
@@ -111,33 +121,6 @@ const Graph1 = () => {
         }
     };
 
-    const handleOutsideClick = () => {
-        setShowTooltip(false);
-        setCurrentNode(null);
-        setCurrentLink(null);
-    };
-
-    //  // Hide popovers when clicking outside the graph
-    useEffect(() => {
-        document.addEventListener('mousedown', handleOutsideClick);
-
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, []);
-
-
-    // the popoverNode variable is declared outside the RenderNodePop component.
-    // This works because the popoverNode variable is a constant and does not depend on
-    // any component state or props. It is defined outside the component's scope and can be
-    // accessed within the component due to lexical scoping.
-    const popoverNode = (
-        <Popover id={currentNode} flip={false}>
-            <Popover.Header as="h3">{currentNode}</Popover.Header>
-            <Popover.Body>{currentNode}</Popover.Body>
-        </Popover>
-    );
-
     /**
      * Render popover for node.
      * @returns {JSX.Element} Popover component.
@@ -156,7 +139,12 @@ const Graph1 = () => {
                 setTooltipPosition({ x: xPos, y: yPos });
             }
         }, []);
-
+        const popoverNode = (
+            <Popover id={currentNode} flip={false}>
+                <Popover.Header as="h3">id : {currentNode}</Popover.Header>
+                <Popover.Body></Popover.Body>
+            </Popover>
+        );
         return (
             <div>
                 {showTooltip && currentNode && (
@@ -175,6 +163,14 @@ const Graph1 = () => {
         );
     };
 
+
+    // the popoverNode variable can be declared outside the RenderNodePop component.
+    // This works because the popoverNode variable is a constant and does not depend on
+    // any component state or props. It is defined outside the component's scope and can be
+    // accessed within the component due to lexical scoping.
+
+
+
     /**
      * Handle link click event.
      * Toggles the tooltip visibility and sets the current link.
@@ -183,7 +179,7 @@ const Graph1 = () => {
      * @param {Event} event - Click event.
      * @returns {void}
      */
-    const handleLinkClick = (source, target, event) => {
+   /* const handleLinkClick = (source, target, event) => {
         if (event) {
             event.stopPropagation();
         }
@@ -196,13 +192,13 @@ const Graph1 = () => {
             setCurrentLink(target);
             setTooltipPosition({ x: 0, y: 0 }); // Reset tooltip position to avoid flickering
         }
-    };
+    };*/
 
     /**
      * Render popover for link.
      * @returns {JSX.Element} Popover component.
      */
-    const RenderLinkPop = () => {
+   /* const RenderLinkPop = () => {
         useEffect(() => {
             if (showTooltip && currentLink && popoverLinkRef.current) {
                 // Calculate the position of the popover based on the link's position and size
@@ -248,25 +244,29 @@ const Graph1 = () => {
             </div>
         );
     };
-
+*/
     return (
         <div ref={graphRef}>
             <Graph
-                id="graph-id"
+                id="Graph1"
                 data={data}
-                config={graph1Config}
+                config={graphConfig}
                 onClickNode={handleNodeClick}
-                onClickLink={(source, target, event) =>
+                /*onClickLink={(source, target, event) =>
                     handleLinkClick(source, target, event)
-                }
+                }*/
             />
             <RenderNodePop />
-            <RenderLinkPop />
-            <button onClick={toggleDirection}>
+            {/*<RenderLinkPop />*/}
+
+            {/*<button onClick={toggleDirection}>
                 {showDirection ? 'Hide Direction' : 'Show Direction'}
-            </button>
+            </button>*/}
         </div>
     );
 };
+
+
+
 
 export default Graph1;
