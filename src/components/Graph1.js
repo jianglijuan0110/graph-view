@@ -3,8 +3,8 @@ import { Graph } from 'react-d3-graph';
 import { Popover } from 'react-bootstrap';
 import '../styles/Graph.css';
 
-//import graphData from "./data/marvel/marvel.data"
-//import graphConfig from "./data/marvel/marvel.config"
+//import graphData from "../data/marvel/marvel.data"
+//import graphConfig from "../data/marvel/marvel.config"
 
 import graphData from "../data/graphData";
 import graphConfig from "../data/graph1Config";

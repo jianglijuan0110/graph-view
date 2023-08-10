@@ -33,30 +33,86 @@ const Graph2 = () => {
     const graphRef = useRef(null);
     const popoverNodeRef = useRef(null);
 
+    const colorForNode = node => {
+        if (node.label.includes('foaf')) {
+            return "blue";
+        } else if (node.label.startsWith('_')) {
+            return "green";
+        } else if (node.label.includes(':')) {
+            return "red";
+        } else if (node.id.includes('lit')) {
+            return "gray";
+        }
+    };
+
+    const shapeForNode = node => {
+        if (node.label.includes(':') || node.label.startsWith('_')) {
+            return "circle"; // Resource node
+        } else {
+            return "square"; // Literal node
+        }
+    };
+
     /**
      * Transfers and transforms the graph data.
      * @function
      * @returns {void}
      */
-    const handleTransferData = () => {
-        if (graphData) {
-            // Perform data transformation and create graph2
-            const transformedGraphData = {
-                nodes: graphData.nodes.map((node) => ({
-                    ...node,
-                    description: `Description for ${node.label}`,
-                })),
-                links: graphData.links.map((link) => ({ ...link, color: 'blue' })),
-            };
+    const handleDataTransformation = () => {
+        const updatedNodes = [];
+        const updatedLinks = [];
 
-            // Update the graph data
-            setTransformedData(transformedGraphData);
+        if (graphData) {
+            for (const node of graphData.nodes) {
+                const transformedNode = {
+                    ...node,
+                    shape: shapeForNode(node),
+                    color: colorForNode(node),
+
+                };
+
+                if (transformedNode.shape !== "square") {
+                    updatedNodes.push(transformedNode);
+                }
+                else {
+                    // If it's a square node, find connected circle nodes and add information
+                    const connectedCircleNodes = updatedNodes.filter(
+                        n => n.shape === "circle" && graphData.links.some(link => link.source === n.id && link.target === transformedNode.id)
+                    );
+
+                    for (const circleNode of connectedCircleNodes) {
+                        circleNode.popup += `Square Node Information: ${transformedNode.label}\n`;
+                    }
+                }
+            }
+
+            for (const link of graphData.links) {
+                const sourceNode = updatedNodes.find(node => node.id === link.source);
+                const targetNode = updatedNodes.find(node => node.id === link.target);
+
+                if (sourceNode && targetNode) {
+                    // Check if the source node's id includes "lit"
+                    if (!sourceNode.id.includes('lit')) { // A node literal cannot serve as a node source.
+                        if (sourceNode.shape === "circle" && targetNode.shape === "square") {
+                            // Transfer the link information to circle node
+                        } else {
+                            updatedLinks.push(link);
+                        }
+                    }
+                }
+            }
+
         }
+
+        setTransformedData({
+            nodes: updatedNodes,
+            links: updatedLinks,
+        });
     };
 
     // Trigger the data transfer when the component mounts
     useEffect(() => {
-        handleTransferData();
+        handleDataTransformation();
     }, [graphData]); // Empty dependency array if you want the effect to run only once
 
     useEffect(() => {
@@ -132,6 +188,32 @@ const Graph2 = () => {
             }
         }, []);
 
+        const getConnectedLinksInfo = () => {
+            const connectedLinks = getConnectedLinks();
+
+            return connectedLinks.map(link => (
+                <p >
+                    <strong>{link.label}</strong> {getConnectedNodeLabels(link)}
+                </p>
+            ));
+        };
+
+        const getConnectedLinks = () => {
+            return graphData.links.filter(
+                link => link.source === currentNode
+            );
+        };
+
+        const getConnectedNodeLabels = link => {
+            const connectedNodeIds = [link.target];
+            const connectedLabels = connectedNodeIds.map(nodeId => {
+                const node = graphData.nodes.find(node => node.id === nodeId);
+                return node ? `:${node.label}`: null;
+            });
+
+            return connectedLabels.filter(label => label !== null);
+        };
+
         /**
          * Popover for the clicked node.
          * @type {JSX.Element}
@@ -139,7 +221,7 @@ const Graph2 = () => {
         const popoverNode = (
             <Popover id={currentNode} flip={false}>
                 <Popover.Header as="h3">id : {currentNode}</Popover.Header>
-                <Popover.Body></Popover.Body>
+                <Popover.Body>{getConnectedLinksInfo()}</Popover.Body>
             </Popover>
         );
 
@@ -163,12 +245,14 @@ const Graph2 = () => {
 
     return (
         <div ref={graphRef} className="graph-container">
-            <Graph
-                id="Graph2"
-                data={data}
-                config={graphConfig}
-                onClickNode={handleNodeClick}
-            />
+            {transformedData && ( // Data is conditionally rendered
+                <Graph
+                    id="Graph2"
+                    data={transformedData}
+                    config={graphConfig}
+                    onClickNode={handleNodeClick}
+                />
+            )}
             <RenderNodePop />
         </div>
     );

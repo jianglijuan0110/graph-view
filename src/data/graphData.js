@@ -1,39 +1,33 @@
 const graphData  = {
     nodes: [
-        { id: 'node_literal', label : 'literal' },
-        { id: 'node_ressource', label : 'ressource'},
+        { id: '_b0', label: '_b0' },
+        { id: 'lit_anonyme', label: 'node-blanc' },
+        { id: 'ex:MDR', label: 'ex:MDR' },
+        { id: 'ex:LJ', label: 'ex:LJ' },
+        { id: 'lit_lijuan', label: '"Lijuan"' },
+        { id: 'lit_JIANG', label: '"JIANG"' },
+        { id: 'foaf:Person', label: 'foaf:Person' },
+        { id: 'lit_lili', label: '"lili"' },
+        { id: 'lit_comm', label: '"lili est une étudiante de l\'Université de Montpellier"' },
 
-        { id: 'node_indiv_LJ', label: 'jiang_lijuan' },
-        { id: 'node_lijuan', label: 'Lijuan' },
-        { id: 'node_JIANG', label: 'JIANG' },
-        { id: 'node_person', label: 'Person' },
-
-
-        { id: 'node_univ_UM', label: 'univ_montpellier'},
-        { id: 'node_organization', label: 'Organization' },
-        { id: 'node_nameU', label : 'Université de Montpellier' },
+        { id: 'ex:univ_UM', label: 'ex:univ_UM'},
+        { id: 'foaf:Organization', label: 'foaf:Organization' },
+        { id: 'lit_nameU', label : '"Université de Montpellier"' },
     ],
     links: [
-        { source: 'node_indiv_LJ', label: 'rdf:type', target: 'node_person' },
-        { source: 'node_indiv_LJ', label: 'firstName', target: 'node_lijuan' },
-        { source: 'node_indiv_LJ', label: 'familyName', target: 'node_JIANG' },
-        { source: 'node_indiv_LJ', label: 'studiesIn', target: 'node_univ_UM' },
+        { source: 'ex:LJ', label: 'rdf:type', target: 'foaf:Person' },
+        { source: 'ex:LJ', label: 'rdfs:label', target: 'lit_lili' },
+        { source: 'ex:LJ', label: 'rdfs:comment', target: 'lit_comm' },
+        { source: '_b0', label: 'rdfs:comment', target: 'lit_anonyme' },
 
-        {source:'node_indiv_LJ' , label: 'rdf:type',  target: 'node_ressource'},
+        { source: 'ex:LJ', label: 'foaf:firstName', target: 'lit_lijuan' },
+        { source: 'ex:LJ', label: 'foaf:familyName', target: 'lit_JIANG' },
+        { source: 'ex:LJ', label: 'ex:studiesIn', target: 'ex:univ_UM' },
 
-        {source:'node_JIANG' , label: 'rdf:type',  target: 'node_literal'},
-        {source:'node_lijuan' , label: 'rdf:type',  target: 'node_literal'},
-        {source:'node_person' , label: 'rdf:type',  target: 'node_literal'},
-
-
-        {source:'node_univ_UM' , label: 'rdf:type',  target: 'node_ressource'},
-
-        { source: 'node_univ_UM', label: 'rdf:type', target: 'node_organization' },
-        { source: 'node_univ_UM', label: 'foaf:name', target: 'node_nameU' },
+        { source: 'ex:univ_UM', label: 'rdf:type', target: 'foaf:Organization' },
+        { source: 'ex:univ_UM', label: 'foaf:name', target: 'lit_nameU' },
 
 
-        {source:'node_organization' , label: 'rdf:type',  target: 'node_literal'},
-        {source:'node_nameU' , label: 'rdf:type',  target: 'node_literal'},
 
     ],
 };
