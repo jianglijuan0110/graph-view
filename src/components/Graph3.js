@@ -4,11 +4,13 @@ import graphData from '../data/graphData';
 import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
+
 /**
- * Graph2 component represents a graph visualization without literal nodes and with different colors.
+ * Graph3 component represents a graph visualization with only source nodes and different colors for different RDF types.
  * @component
  */
-const Graph2 = () => {
+
+const Graph3 = () => {
 
     /**
      * Graph data state.
@@ -43,32 +45,58 @@ const Graph2 = () => {
         '#808080', // Gray
         '#FFC0CB'  // Pink
     ];
+
     /**
-     * Splits a label into parts using a colon as a delimiter.
+     * Retrieves a set of source nodes from the graph data's links.
      *
-     * @param {string} label - The label to be split.
-     * @returns {Object} - An object containing the parts before and after the colon.
+     * @function
+     * @returns {Set} Set of source node IDs.
      */
-    const splitLabel = label => {
-        const parts = label.split(':');
-        const beforeColon = parts[0];
-        const afterColon = parts[1];
-        return { beforeColon, afterColon };
+    const getSourceNodes = () => {
+        return new Set(graphData.links.map(link => link.source));
     };
 
     /**
-     * Gets the source nodes based on the links in the graph data.
+     * Checks if the given link is of type 'rdf:type'.
      *
-     * @param {Object} graphData - The graph data containing nodes and links.
-     * @returns {Set} - A set of source node IDs.
+     * @function
+     * @param {Object} link - The link object.
+     * @returns {boolean} True if the link is of type 'rdf:type', false otherwise.
      */
-    const getSourceNodes = (graphData) => {
-        const sourceNodes = new Set(graphData.links.map(link => link.source));
-        const targetRdfTypeNodes = new Set(graphData.links.filter(link => link.label === 'rdf:type').map(link => link.target));
-
-        targetRdfTypeNodes.forEach(targetRdfTypeNode => sourceNodes.add(targetRdfTypeNode));
-        return sourceNodes;
+    const isTypeRdf = link => {
+        return link.label === 'rdf:type';
     };
+
+    /**
+     * Gets the RDF type of a given node based on its links.
+     *
+     * @function
+     * @param {Object} node - The node object.
+     * @returns {string|null} The RDF type of the node or null if not found.
+     */
+    const getRdfType = node => {
+        const nodesByType = {};
+
+        graphData.links.forEach(link => {
+            if (isTypeRdf(link)) {
+                const { source: sourceNode, target: targetType } = link;
+                if (!nodesByType[targetType]) {
+                    nodesByType[targetType] = [];
+                }
+                nodesByType[targetType].push(sourceNode);
+            }
+        });
+
+        for (const [type, sourceNodes] of Object.entries(nodesByType)) {
+            if (sourceNodes.includes(node.id)) {
+                return type;
+            }
+        }
+
+        return null; // If no type is found for the node
+    };
+
+
 
     /**
      * Transfers and transforms the graph data.
@@ -76,37 +104,42 @@ const Graph2 = () => {
      * @returns {void}
      */
     const handleDataTransformation = () => {
-        const updatedNodes = [];
         const updatedLinks = [];
-        const sourceNodes = getSourceNodes(graphData); // Get nodes for which shape should be circle
-
+        const updatedNodes = [];
+        const sourceNodes = getSourceNodes(); // Get nodes for which transformations will be applied
         const colorMap = new Map(); // Store assigned colors for each node ID
 
         // Process graph data if available
         if (graphData) {
             // Process each node in the graph data
             for (const node of graphData.nodes) {
+                const rdfType = getRdfType(node); // Get the rdf:type of the node
+                console.log(rdfType); // Log the rdfType to the console
+
                 // Check if the node's ID is in sourceNodes
                 if (sourceNodes.has(node.id)) {
                     updatedNodes.push(node);
 
                     let assignedColor = colorMap.get(node.id);
-
                     if (!assignedColor) {
-                        const colorIndex = updatedNodes.length - 1;
+                        const colorIndex = updatedNodes.indexOf(node);
+
+                        // Check if the color index is within the range of available colors
                         if (colorIndex < colorData.length) {
-                            const { beforeColon } = splitLabel(node.label);
-                            if (beforeColon) {
-                                const existingColor = colorMap.get(beforeColon);
+                            if (rdfType) {
+                                const existingColor = colorMap.get(rdfType);
                                 if (existingColor) {
                                     assignedColor = existingColor;
                                 } else {
                                     assignedColor = colorData[colorIndex];
-                                    colorMap.set(beforeColon, assignedColor);
+                                    colorMap.set(rdfType, assignedColor);
                                 }
-                                node.color = assignedColor;
-                                colorMap.set(node.id, assignedColor);
+                            } else {
+                                assignedColor = 'gray'; // Default color for nodes without rdf:type
                             }
+
+                            node.color = assignedColor;
+                            colorMap.set(node.id, assignedColor);
                         }
                     }
                 }
@@ -127,8 +160,6 @@ const Graph2 = () => {
             links: updatedLinks,
         });
     };
-
-
 
 // Trigger the data transformation when the component mounts
     useEffect(() => {
@@ -209,14 +240,13 @@ const Graph2 = () => {
             }
         }, []);
 
-
-
         /**
-         * Retrieves links that are connected to the specified currentNode and not connected to any source node.
+         * Gets the links connected to the given current node.
          *
+         * @function
          * @param {Object} graphData - The graph data containing nodes and links.
          * @param {string} currentNode - The ID of the current node.
-         * @returns {Array<Object>} An array of link objects connected to the currentNode.
+         * @returns {Array} Array of links connected to the current node.
          */
         const getConnectedLinks = (graphData, currentNode) => {
             const sourceNodes = getSourceNodes(graphData);
@@ -227,11 +257,12 @@ const Graph2 = () => {
         };
 
         /**
-         * Retrieves labels of connected nodes based on the given link and graph data.
+         * Gets the labels of connected nodes for the given link.
          *
+         * @function
          * @param {Object} link - The link object.
          * @param {Object} graphData - The graph data containing nodes and links.
-         * @returns {Array<string>} An array of labels of nodes connected through the given link.
+         * @returns {Array} Array of labels of connected nodes.
          */
         const getConnectedNodeLabels = (link, graphData) => {
             const sourceNodes = getSourceNodes(graphData);
@@ -248,19 +279,23 @@ const Graph2 = () => {
         };
 
         /**
-         * Generates information about connected links and their connected node labels.
+         * Generates information about connected links for the current node.
          *
-         * @returns {Array<JSX.Element>} An array of JSX elements representing connected link information.
+         * @function
+         * @returns {Array} Array of JSX elements representing connected link information.
          */
         const getConnectedLinksInfo = () => {
             const connectedLinks = getConnectedLinks(graphData, currentNode);
 
             return connectedLinks.map(link => (
                 <p key={link.id}>
-                    <strong>{link.label}</strong> : {getConnectedNodeLabels(link, graphData)}
+                    <strong>{link.label}</strong> : {getConnectedNodeLabels(link, graphData).join(', ')}
                 </p>
             ));
         };
+
+
+
 
         /**
          * Popover for the clicked node.
@@ -298,7 +333,7 @@ const Graph2 = () => {
         <div ref={graphRef} className="graph-container">
             {transformedData && ( // Data is conditionally rendered
                 <Graph
-                    id="Graph2"
+                    id="Graph3"
                     data={transformedData}
                     config={graphConfig}
                     onClickNode={handleNodeClick}
@@ -309,4 +344,4 @@ const Graph2 = () => {
     );
 };
 
-export default Graph2;
+export default Graph3;
