@@ -4,6 +4,15 @@ import graphData from '../data/graphData';
 import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
+import {
+    splitLabel,
+    getNodeIsolated,
+    getNodeTargetRdf,
+    getNodeLiterals,
+    getSourceNodes,
+
+} from '../utils/graphHelpers';
+
 /**
  * Graph2 component represents a graph visualization without literal nodes and with different colors.
  * @component
@@ -43,32 +52,33 @@ const Graph2 = () => {
         '#808080', // Gray
         '#FFC0CB'  // Pink
     ];
-    /**
-     * Splits a label into parts using a colon as a delimiter.
-     *
-     * @param {string} label - The label to be split.
-     * @returns {Object} - An object containing the parts before and after the colon.
-     */
-    const splitLabel = label => {
-        const parts = label.split(':');
-        const beforeColon = parts[0];
-        const afterColon = parts[1];
-        return { beforeColon, afterColon };
-    };
 
     /**
-     * Gets the source nodes based on the links in the graph data.
+     * Get a set of nodes that can be reached in the graph.
      *
      * @param {Object} graphData - The graph data containing nodes and links.
-     * @returns {Set} - A set of source node IDs.
+     * @returns {Set} - A set of node IDs that can be reached.
      */
-    const getSourceNodes = (graphData) => {
-        const sourceNodes = new Set(graphData.links.map(link => link.source));
-        const targetRdfTypeNodes = new Set(graphData.links.filter(link => link.label === 'rdf:type').map(link => link.target));
+    const getReachableNodes = (graphData) => {
+        const sourceNodes = getSourceNodes(graphData); // Get source nodes
+        const targetRdfTypeNodes = getNodeTargetRdf(graphData); // Get 'rdf:type' target nodes
+        const nodesLiterals = getNodeLiterals(graphData, sourceNodes, targetRdfTypeNodes); // Get literal nodes
+        const nodesIsolated = getNodeIsolated(graphData);
+        const reachableNodes = new Set([...sourceNodes, ...targetRdfTypeNodes, ...nodesIsolated]); // Initialize with source and target nodes
 
-        targetRdfTypeNodes.forEach(targetRdfTypeNode => sourceNodes.add(targetRdfTypeNode));
-        return sourceNodes;
+        graphData.nodes.forEach(node => {
+            if (!reachableNodes.has(node.id) && !nodesLiterals.has(node.id)) {
+                reachableNodes.add(node.id); // Add nodes reachable through other nodes
+            }
+        });
+
+        //console.log("reachableNodes:", reachableNodes);
+
+
+        return reachableNodes;
     };
+
+
 
     /**
      * Transfers and transforms the graph data.
@@ -78,7 +88,8 @@ const Graph2 = () => {
     const handleDataTransformation = () => {
         const updatedNodes = [];
         const updatedLinks = [];
-        const sourceNodes = getSourceNodes(graphData); // Get nodes for which shape should be circle
+        const sourceNodes = getSourceNodes(graphData);
+        const nodesForTransformation = getReachableNodes(graphData);
 
         const colorMap = new Map(); // Store assigned colors for each node ID
 
@@ -87,7 +98,7 @@ const Graph2 = () => {
             // Process each node in the graph data
             for (const node of graphData.nodes) {
                 // Check if the node's ID is in sourceNodes
-                if (sourceNodes.has(node.id)) {
+                if (nodesForTransformation.has(node.id)) {
                     updatedNodes.push(node);
 
                     let assignedColor = colorMap.get(node.id);
@@ -95,14 +106,14 @@ const Graph2 = () => {
                     if (!assignedColor) {
                         const colorIndex = updatedNodes.length - 1;
                         if (colorIndex < colorData.length) {
-                            const { beforeColon } = splitLabel(node.label);
-                            if (beforeColon) {
-                                const existingColor = colorMap.get(beforeColon);
+                            const { prefix } = splitLabel(node.label);
+                            if (prefix) {
+                                const existingColor = colorMap.get(prefix);
                                 if (existingColor) {
                                     assignedColor = existingColor;
                                 } else {
                                     assignedColor = colorData[colorIndex];
-                                    colorMap.set(beforeColon, assignedColor);
+                                    colorMap.set(prefix, assignedColor);
                                 }
                                 node.color = assignedColor;
                                 colorMap.set(node.id, assignedColor);
@@ -116,7 +127,7 @@ const Graph2 = () => {
         // Process links in the graph data
         for (const link of graphData.links) {
             // Check if both source and target nodes are in sourceNodes
-            if (sourceNodes.has(link.source) && sourceNodes.has(link.target)) {
+            if (nodesForTransformation.has(link.source) && nodesForTransformation.has(link.target)) {
                 updatedLinks.push(link);
             }
         }
@@ -219,7 +230,7 @@ const Graph2 = () => {
          * @returns {Array<Object>} An array of link objects connected to the currentNode.
          */
         const getConnectedLinks = (graphData, currentNode) => {
-            const sourceNodes = getSourceNodes(graphData);
+            const sourceNodes = getReachableNodes(graphData);
 
             return graphData.links.filter(link =>
                 link.source === currentNode && !sourceNodes.has(link.target)
@@ -234,10 +245,10 @@ const Graph2 = () => {
          * @returns {Array<string>} An array of labels of nodes connected through the given link.
          */
         const getConnectedNodeLabels = (link, graphData) => {
-            const sourceNodes = getSourceNodes(graphData);
+            const reachableNodes = getReachableNodes(graphData);
 
             const connectedNodeIds = [link.target]
-                .filter(targetNodeId => !sourceNodes.has(targetNodeId));
+                .filter(targetNodeId => !reachableNodes.has(targetNodeId));
 
             const connectedLabels = connectedNodeIds.map(nodeId => {
                 const node = graphData.nodes.find(n => n.id === nodeId);
@@ -245,6 +256,9 @@ const Graph2 = () => {
             });
 
             return connectedLabels.filter(label => label !== null);
+            // console.log("connecteNodeId", connectedNodeIds);
+
+            // console.log("connectedLabels", connectedLabels);
         };
 
         /**

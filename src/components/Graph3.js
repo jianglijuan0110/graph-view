@@ -5,6 +5,12 @@ import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
 
+
+import {
+    getNodeIsolated,
+    getSourceNodes,
+
+} from '../utils/graphHelpers';
 /**
  * Graph3 component represents a graph visualization with only source nodes and different colors for different RDF types.
  * @component
@@ -46,15 +52,6 @@ const Graph3 = () => {
         '#FFC0CB'  // Pink
     ];
 
-    /**
-     * Retrieves a set of source nodes from the graph data's links.
-     *
-     * @function
-     * @returns {Set} Set of source node IDs.
-     */
-    const getSourceNodes = () => {
-        return new Set(graphData.links.map(link => link.source));
-    };
 
     /**
      * Checks if the given link is of type 'rdf:type'.
@@ -70,33 +67,40 @@ const Graph3 = () => {
     /**
      * Gets the RDF type of a given node based on its links.
      *
-     * @function
      * @param {Object} node - The node object.
      * @returns {string|null} The RDF type of the node or null if not found.
      */
     const getRdfType = node => {
+        // Create an empty object to store source nodes grouped by target nodes
         const nodesByType = {};
 
+        // Loop through each link in the graph data
         graphData.links.forEach(link => {
+            // Check if the link is of type 'rdf:type'
             if (isTypeRdf(link)) {
+                // Destructure the source and target nodes from the link
                 const { source: sourceNode, target: targetType } = link;
+
+                // If the target node's group doesn't exist, create it
                 if (!nodesByType[targetType]) {
                     nodesByType[targetType] = [];
                 }
+
+                // Add the source node to the group of the target node
                 nodesByType[targetType].push(sourceNode);
             }
         });
 
+        // Loop through the groups created earlier
         for (const [type, sourceNodes] of Object.entries(nodesByType)) {
+            // Check if the current node is a source node in any group
             if (sourceNodes.includes(node.id)) {
-                return type;
+                return type; // Return the corresponding type
             }
         }
 
         return null; // If no type is found for the node
     };
-
-
 
     /**
      * Transfers and transforms the graph data.
@@ -106,7 +110,7 @@ const Graph3 = () => {
     const handleDataTransformation = () => {
         const updatedLinks = [];
         const updatedNodes = [];
-        const sourceNodes = getSourceNodes(); // Get nodes for which transformations will be applied
+        const sourceNodes = getSourceNodes(graphData); // Get nodes for which transformations will be applied
         const colorMap = new Map(); // Store assigned colors for each node ID
 
         // Process graph data if available
@@ -117,7 +121,7 @@ const Graph3 = () => {
                 console.log(rdfType); // Log the rdfType to the console
 
                 // Check if the node's ID is in sourceNodes
-                if (sourceNodes.has(node.id)) {
+                if (sourceNodes.has(node.id) || getNodeIsolated(graphData).has(node.id)) {
                     updatedNodes.push(node);
 
                     let assignedColor = colorMap.get(node.id);

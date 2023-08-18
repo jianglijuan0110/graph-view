@@ -10,6 +10,12 @@ import graphData from "../data/graphData";
 import graphConfig from "../data/graph1Config";
 
 import {useGraphState} from "../utils/GraphState";
+import {
+    getNodeTargetRdf,
+    getNodeLiterals,
+    getSourceNodes,
+} from '../utils/graphHelpers';
+
 
 
 /**
@@ -62,30 +68,41 @@ const Graph1 = () => {
         graphConfig.directed = newShowDirection; // Update the direction in the config file
     };*/
 
-
     /**
-     * Gets the source nodes based on the links in the graph data.
+     * Get a set of nodes that can be reached in the graph.
      *
      * @param {Object} graphData - The graph data containing nodes and links.
-     * @returns {Set} - A set of source node IDs.
+     * @returns {Set} - A set of node IDs that can be reached.
      */
-    const getSourceNodes = (graphData) => {
-        const sourceNodes = new Set(graphData.links.map(link => link.source));
-        const targetRdfTypeNodes = new Set(graphData.links.filter(link => link.label === 'rdf:type').map(link => link.target));
+    const getReachableNodes = (graphData) => {
+        const sourceNodes = getSourceNodes(graphData); // Get source nodes
+        const targetRdfTypeNodes = getNodeTargetRdf(graphData); // Get 'rdf:type' target nodes
+        const nodesLit = getNodeLiterals(graphData, sourceNodes, targetRdfTypeNodes); // Get literal nodes
 
-        targetRdfTypeNodes.forEach(targetRdfTypeNode => sourceNodes.add(targetRdfTypeNode));
-        return sourceNodes;
+        const reachableNodes = new Set([...sourceNodes, ...targetRdfTypeNodes]); // Initialize with source and target nodes
+
+        graphData.nodes.forEach(node => {
+            if (!reachableNodes.has(node.id) && !nodesLit.has(node.id)) {
+                reachableNodes.add(node.id); // Add nodes reachable through other nodes
+            }
+        });
+        //   console.log("reachableNodes:", reachableNodes);
+
+        return reachableNodes;
+
+
     };
 
+
     /**
-     * Determines the shape of a node based on the provided nodeCircle set.
+     * Determines the shape of a node based on the provided nodesNotLiteral set.
      *
      * @param {Object} node - The node for which to determine the shape.
-     * @param {Set} nodeCircle - A set of nodes that should have a "circle" shape.
+     * @param {Set} nodesNotLiteral - A set of nodes that are not literal.
      * @returns {string} - The shape of the node ("circle" or "square").
      */
-    const shapeForNode = (node, nodeCircle) => {
-        if (nodeCircle.has(node.id)) {
+    const shapeForNode = (node, nodesNotLiteral) => {
+        if (nodesNotLiteral.has(node.id)) {
             return "circle"; // Resource node
         } else {
             return "square"; // Literal node
@@ -101,7 +118,8 @@ const Graph1 = () => {
 
     const handleDataTransformation = () => {
         // Get nodes for which shape should be circle
-        const nodeCircle = getSourceNodes(graphData);
+        const nodesNotLiteral = getReachableNodes(graphData);
+        //console.log("nodecircle", nodesNotLiteral);
 
         // Arrays to store updated nodes and links
         const updatedNodes = [];
@@ -113,7 +131,7 @@ const Graph1 = () => {
                 // Transform the node with updated shape
                 const transformedNode = {
                     ...node,
-                    symbolType: shapeForNode(node, nodeCircle), // Pass nodeCircle to shapeForNode
+                    symbolType: shapeForNode(node, nodesNotLiteral), // Pass nodesNotLiteral to shapeForNode
                 };
 
                 // Add the transformed node to the updatedNodes array
