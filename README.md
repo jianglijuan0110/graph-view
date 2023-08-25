@@ -31,12 +31,12 @@ npm install react-d3-graph@2.6.0 --legacy-peer-deps
 ```bash
 npm install react-bootstrap bootstrap --force 
 ```
-
-
+```bash
+npm install react-draggable --force
+```
 
 ## 🛠️ Execution    
 ```bash
 npm start
 ```
-        
         

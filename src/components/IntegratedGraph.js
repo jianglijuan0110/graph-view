@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Graph1 from './Graph1.js';
 import Graph2 from './Graph2.js';
 import Graph3 from './Graph3.js';
+import Graph4 from "./Graph4";
 
 /**
  * Component representing an integrated graph.
@@ -19,9 +20,6 @@ const IntegratedGraph = () => {
         setShowGraph(1);
     };
 
-    const handleToggleGraph1Bis = () => {
-        setShowGraph(1.5);
-    };
 
     /**
      * Handle toggle graph 2 event.
@@ -43,6 +41,7 @@ const IntegratedGraph = () => {
     const handleToggleGraph4 = () => {
         setShowGraph(4);
     };
+
     const [graphData, setGraphData] = useState({
         nodes: [],
         links: [],
@@ -63,7 +62,7 @@ const IntegratedGraph = () => {
             <button onClick={handleToggleGraph1}>Vue 1</button>
             <button onClick={handleToggleGraph2}>Vue 2</button>
             <button onClick={handleToggleGraph3}>Vue 3</button>
-
+            <button onClick={handleToggleGraph4}>Vue 4</button>
             {showGraph === 1 ? (
                 <div>
                     <h1>Vue 1</h1>
@@ -75,12 +74,16 @@ const IntegratedGraph = () => {
                     <h1>Vue 2</h1>
                     <Graph2 graphData={graphData} />
                 </div>
-            ) :  (
+            ) : showGraph === 3 ? (
                 <div>
                     <h1>Vue 3</h1>
                     <Graph3 graphData={graphData} />
                 </div>
-
+            )    : (
+                <div>
+                    <h1>Vue 4</h1>
+                    <Graph4 graphData={graphData} />
+                </div>
             )}
 
         </div>
