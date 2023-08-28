@@ -3,21 +3,23 @@ import { Graph } from 'react-d3-graph';
 import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
-import { colorList, criteriaList} from './ZoneWindow';
 import ZoneWindow from './ZoneWindow';
+
+
 
 import {
     getNodeIsolated,
     getSourceNodes,
-
 } from '../utils/graphHelpers';
+
+
 /**
  * Graph4 component represents a graph visualization with only source nodes and different colors for different RDF types.
  * @component
  */
 
 const Graph4 = () => {
-    // Handle file upload event
+
 
     /**
      * Graph data state.
@@ -45,11 +47,16 @@ const Graph4 = () => {
     const popoverNodeRef = useRef(null);
 
 
+    /**
+     * Handles the uploaded file content and updates the graph data state.
+     *
+     * @param {File} uploadedFile - The uploaded file.
+     * @returns {void}
+     */
     const handleFileUpload = async (uploadedFile) => {
         if (uploadedFile) {
             try {
                 const fileContent = await uploadedFile.text();
-
                 const parsedData = JSON.parse(fileContent);
                 setData(parsedData);
             } catch (error) {
@@ -57,112 +64,113 @@ const Graph4 = () => {
             }
         }
     };
-    //console.log(graphData);
-    const handleColorChange = (newColorCode) => {
-        setSelectedColor(newColorCode);
-        console.log("Selected Color:", newColorCode);
 
-        handleDataTransformation();
-    };
-
-
-
-    const handleCriteriaChange = (newCriteria) => {
-        setSelectedCriteria(newCriteria);
-        console.log("Selected Criteria:", newCriteria);
-
-    };
-
-    /**
-     * Checks if the given link is of type 'rdf:type'.
-     *
-     * @function
-     * @param {Object} link - The link object.
-     * @returns {boolean} True if the link is of type 'rdf:type', false otherwise.
-     */
     const isTypeRdf = link => {
         return link.label === 'rdf:type';
     };
 
-    /**
-     * Gets the RDF type of a given node based on its links.
-     *
-     * @param {Object} node - The node object.
-     * @returns {string|null} The RDF type of the node or null if not found.
-     */
     const getRdfType = node => {
-        // Create an empty object to store source nodes grouped by target nodes
-        const nodesByType = {};
+        // Find the link with label 'rdf:type' that has the current node as source
+        const rdfTypeLink = graphData.links.find(link => link.source === node.id && isTypeRdf(link));
 
-        // Loop through each link in the graph data
-        graphData.links.forEach(link => {
-            // Check if the link is of type 'rdf:type'
-            if (isTypeRdf(link)) {
-                // Destructure the source and target nodes from the link
-                const { source: sourceNode, target: targetType } = link;
-
-                // If the target node's group doesn't exist, create it
-                if (!nodesByType[targetType]) {
-                    nodesByType[targetType] = [];
-                }
-
-                // Add the source node to the group of the target node
-                nodesByType[targetType].push(sourceNode);
-            }
-        });
-
-        // Loop through the groups created earlier
-        for (const [type, sourceNodes] of Object.entries(nodesByType)) {
-            // Check if the current node is a source node in any group
-            if (sourceNodes.includes(node.id)) {
-                return type; // Return the corresponding type
-            }
+        if (rdfTypeLink) {
+            const targetType = rdfTypeLink.target;
+            return targetType;
         }
 
         return null; // If no type is found for the node
     };
 
 
+    const [criteriaList, setCriteriaList] = useState([]);
+
+    useEffect(() => {
+        if (graphData) {
+            const nodesByType = {};
+
+            graphData.links.forEach(link => {
+                if (isTypeRdf(link)) {
+                    const { source: sourceNode, target: targetType } = link;
+
+                    if (!nodesByType[targetType]) {
+                        nodesByType[targetType] = [];
+                    }
+
+                    nodesByType[targetType].push(sourceNode);
+                }
+            });
+
+            const extractedCriteriaList = Object.keys(nodesByType);
+            setCriteriaList(extractedCriteriaList);
+        }
+    }, [graphData]);
+
+
+
 
     /**
-     * Transfers and transforms the graph data.
+     * Handles the color change event and updates the selected color state.
+     *
+     * @param {string} newColorCode - The new color code selected.
+     * @returns {void}
+     */
+    const handleColorChange = (newColorCode) => {
+        setSelectedColor(newColorCode);
+        // console.log("Selected Color :", newColorCode);
+        handleDataTransformation();
+    };
+
+    /**
+     * Handles the criteria change event and updates the selected criteria state.
+     *
+     * @param {string} newCriteria - The new criteria selected.
+     * @returns {void}
+     */
+    const handleCriteriaChange = (newCriteria) => {
+        setSelectedCriteria(newCriteria);
+        //console.log("Selected Criteria:", newCriteria);
+    };
+
+    /**
+     * Transforms the graph data based on selected criteria and color, updating the transformed data state.
+     *
      * @function
      * @returns {void}
      */
-
-
-// Trigger the data transformation when the component mounts
     const handleDataTransformation = () => {
+        // Create a map to store color associations with RDF types
         const colorMap = new Map();
+
+        // Get source nodes and initialize arrays to store updated nodes and links
         const sourceNodes = getSourceNodes(graphData);
         const updatedNodes = [];
         const updatedLinks = [];
 
+        // Proceed only if there is graph data available
         if (graphData) {
-            // Ensure selectedColor is valid
-            const validSelectedColor = colorList.includes(selectedColor) ? selectedColor : null;
-
             // Process each node in the graph data
             for (const node of graphData.nodes) {
                 const rdfType = getRdfType(node);
 
-                if (
-                    sourceNodes.has(node.id) ||
-                    getNodeIsolated(graphData).has(node.id)
-                ) {
+                // Check if the node is a source node or isolated node
+                if (sourceNodes.has(node.id) || getNodeIsolated(graphData).has(node.id)) {
                     updatedNodes.push(node);
-                    if (
-                        rdfType === selectedCriteria &&
-                        criteriaList.includes(selectedCriteria) &&
-                        validSelectedColor // Check against valid selected color
-                    ) {
-                        node.color = validSelectedColor;
-                        colorMap.set(rdfType, validSelectedColor);
+
+                    // Check if the node meets the selected criteria and color conditions
+                    if (rdfType === selectedCriteria && criteriaList.includes(selectedCriteria)) {
+                        if (selectedColor) {
+                            // Apply the selected color to the node and update colorMap
+                            node.color = selectedColor;
+                            colorMap.set(rdfType, selectedColor);
+                        }
+                        else {
+                            // Set the color of nodes that meet criteria but lack color to gray
+                            node.color = 'gray';
+                        }
+                    } else {
+                        // Set the color of nodes that don't meet criteria or color conditions to gray
+                        node.color = 'gray';
                     }
-                    else{
-                        console.error("Selected color is not valid or not in colorList:", selectedColor);}
-                } else {
-                    console.error("Selected color is not valid or not in colorList:", selectedColor);
                 }
             }
 
@@ -175,6 +183,7 @@ const Graph4 = () => {
             }
         }
 
+        // Update the transformed data state with updated nodes and links
         setTransformedData({
             nodes: updatedNodes,
             links: updatedLinks,
@@ -203,6 +212,8 @@ const Graph4 = () => {
             clearTimeout(fetchData);
         };
     }, []);
+
+
 
     /**
      * Handles outside click to hide popovers.
@@ -354,35 +365,37 @@ const Graph4 = () => {
     };
 
 
-
+    console.log(criteriaList);
     return (
-        <div style={{ border: '1px solid black' }}>
 
-        <div className="graph-page">
-            <div className="graph-container">
-                {transformedData && (
-                    <Graph
-                        id="Graph4"
-                        data={transformedData}
-                        config={graphConfig}
-                        onClickNode={handleNodeClick}
+        <div ref={graphRef}
+             style={{ border: '1px solid black' }}>
+            <div className="graph-page">
+                <div className="graph-container">
+                    {transformedData  &&(
+                        <Graph
+                            id="Graph4"
+                            data={transformedData}
+                            config={graphConfig}
+                            onClickNode={handleNodeClick}
+
+                        />
+                    )}
+
+                    <RenderNodePop />
+                </div>
+
+                <div className="zone-window-container">
+                    <ZoneWindow
+                        handleFileUpload={handleFileUpload}
+                        handleColorChange={handleColorChange}
+                        handleCriteriaChange={handleCriteriaChange}
+                        criteriaList={criteriaList} // criteriaList as prop
 
                     />
-                )}
 
-                <RenderNodePop />
+                </div>
             </div>
-
-            <div className="zone-window-container">
-                <ZoneWindow
-                    handleFileUpload={handleFileUpload}
-                    handleColorChange={handleColorChange}
-                    handleCriteriaChange={handleCriteriaChange}
-
-                />
-
-            </div>
-        </div>
         </div>
     );
 };

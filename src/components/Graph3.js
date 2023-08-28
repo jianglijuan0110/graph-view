@@ -5,12 +5,12 @@ import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
 
-
 import {
     getNodeIsolated,
     getSourceNodes,
 
 } from '../utils/graphHelpers';
+
 /**
  * Graph3 component represents a graph visualization with only source nodes and different colors for different RDF types.
  * @component
@@ -28,7 +28,6 @@ const Graph3 = () => {
         nodes: [],
         links: [],
     });
-
     // State variables
     const [transformedData, setTransformedData] = useState(null);
     const [showTooltip, setShowTooltip] = useState(false);
@@ -39,6 +38,7 @@ const Graph3 = () => {
     // Refs
     const graphRef = useRef(null);
     const popoverNodeRef = useRef(null);
+
     const colorData = [
         '#0000FF', // Blue
         '#008000', // Green
@@ -52,51 +52,17 @@ const Graph3 = () => {
         '#FFC0CB'  // Pink
     ];
 
-
-    /**
-     * Checks if the given link is of type 'rdf:type'.
-     *
-     * @function
-     * @param {Object} link - The link object.
-     * @returns {boolean} True if the link is of type 'rdf:type', false otherwise.
-     */
     const isTypeRdf = link => {
         return link.label === 'rdf:type';
     };
 
-    /**
-     * Gets the RDF type of a given node based on its links.
-     *
-     * @param {Object} node - The node object.
-     * @returns {string|null} The RDF type of the node or null if not found.
-     */
     const getRdfType = node => {
-        // Create an empty object to store source nodes grouped by target nodes
-        const nodesByType = {};
+        // Find the link with label 'rdf:type' that has the current node as source
+        const rdfTypeLink = graphData.links.find(link => link.source === node.id && isTypeRdf(link));
 
-        // Loop through each link in the graph data
-        graphData.links.forEach(link => {
-            // Check if the link is of type 'rdf:type'
-            if (isTypeRdf(link)) {
-                // Destructure the source and target nodes from the link
-                const { source: sourceNode, target: targetType } = link;
-
-                // If the target node's group doesn't exist, create it
-                if (!nodesByType[targetType]) {
-                    nodesByType[targetType] = [];
-                }
-
-                // Add the source node to the group of the target node
-                nodesByType[targetType].push(sourceNode);
-            }
-        });
-
-        // Loop through the groups created earlier
-        for (const [type, sourceNodes] of Object.entries(nodesByType)) {
-            // Check if the current node is a source node in any group
-            if (sourceNodes.includes(node.id)) {
-                return type; // Return the corresponding type
-            }
+        if (rdfTypeLink) {
+            const targetType = rdfTypeLink.target;
+            return targetType;
         }
 
         return null; // If no type is found for the node
@@ -137,6 +103,7 @@ const Graph3 = () => {
                                 } else {
                                     assignedColor = colorData[colorIndex];
                                     colorMap.set(rdfType, assignedColor);
+
                                 }
                             } else {
                                 assignedColor = 'gray'; // Default color for nodes without rdf:type
@@ -334,16 +301,19 @@ const Graph3 = () => {
 
 
     return (
-        <div ref={graphRef} className="graph-container">
-            {transformedData && ( // Data is conditionally rendered
-                <Graph
-                    id="Graph3"
-                    data={transformedData}
-                    config={graphConfig}
-                    onClickNode={handleNodeClick}
-                />
-            )}
-            <RenderNodePop />
+        <div style={{ border: '1px solid black' }}>
+
+            <div ref={graphRef} className="graph-container">
+                {transformedData && ( // Data is conditionally rendered
+                    <Graph
+                        id="Graph3"
+                        data={transformedData}
+                        config={graphConfig}
+                        onClickNode={handleNodeClick}
+                    />
+                )}
+                <RenderNodePop />
+            </div>
         </div>
     );
 };

@@ -4,6 +4,7 @@ import graphData from '../data/graphData';
 import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
+
 import {
     splitLabel,
     getNodeIsolated,
@@ -71,9 +72,6 @@ const Graph2 = () => {
                 reachableNodes.add(node.id); // Add nodes reachable through other nodes
             }
         });
-
-        //console.log("reachableNodes:", reachableNodes);
-
 
         return reachableNodes;
     };
@@ -309,16 +307,19 @@ const Graph2 = () => {
 
 
     return (
-        <div ref={graphRef} className="graph-container">
-            {transformedData && ( // Data is conditionally rendered
-                <Graph
-                    id="Graph2"
-                    data={transformedData}
-                    config={graphConfig}
-                    onClickNode={handleNodeClick}
-                />
-            )}
-            <RenderNodePop />
+        <div style={{ border: '1px solid black' }}>
+
+            <div ref={graphRef} className="graph-container">
+                {transformedData && ( // Data is conditionally rendered
+                    <Graph
+                        id="Graph2"
+                        data={transformedData}
+                        config={graphConfig}
+                        onClickNode={handleNodeClick}
+                    />
+                )}
+                <RenderNodePop />
+            </div>
         </div>
     );
 };
