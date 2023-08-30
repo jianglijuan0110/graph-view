@@ -4,6 +4,7 @@
     { "id": "lit_anonyme", "label": "\"node-blanc\"" },
     { "id": "ex:MDR", "label": "ex:MDR" },
     { "id": "ex:IRD", "label": "ex:IRD" },
+    { "id": "ex:ISA", "label": "ex:ISA" },
     { "id": "ex:LJ", "label": "ex:LJ" },
     { "id": "lit_lijuan", "label": "\"Lijuan\"" },
     { "id": "lit_JIANG", "label": "\"JIANG\"" },

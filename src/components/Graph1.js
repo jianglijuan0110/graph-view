@@ -34,15 +34,42 @@ const Graph1 = () => {
     });
 
 
-    // State variables
+// State variables
+    /**
+     * Represents the transformed data for the graph.
+     * @type {Object|null}
+     */
     const [transformedData, setTransformedData] = useState(null);
+
+    /**
+     * Determines whether the tooltip should be displayed.
+     * @type {boolean}
+     */
     const [showTooltip, setShowTooltip] = useState(false);
+
+    /**
+     * Represents the currently selected node for displaying tooltip.
+     * @type {Object|null}
+     */
     const [currentNode, setCurrentNode] = useState(null);
-    const [currentLink, setCurrentLink] = useState(null);
+
+    /**
+     * Stores the position coordinates (x, y) for displaying the tooltip.
+     * @type {{ x: number, y: number }}
+     */
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-    // Refs
+// Refs
+    /**
+     * Ref to the graph element in the DOM.
+     * @type {React.RefObject}
+     */
     const graphRef = useRef(null);
+
+    /**
+     * Ref to the node element in the DOM that the popover tooltip is attached to.
+     * @type {React.RefObject}
+     */
     const popoverNodeRef = useRef(null);
 
 
@@ -65,11 +92,8 @@ const Graph1 = () => {
                 reachableNodes.add(node.id); // Add nodes reachable through other nodes
             }
         });
-        //   console.log("reachableNodes:", reachableNodes);
 
         return reachableNodes;
-
-
     };
 
 
@@ -98,8 +122,6 @@ const Graph1 = () => {
     const handleDataTransformation = () => {
         // Get nodes for which shape should be circle
         const nodesNotLiteral = getReachableNodes(graphData);
-        //console.log("nodecircle", nodesNotLiteral);
-
         // Arrays to store updated nodes and links
         const updatedNodes = [];
         const updatedLinks = [];
@@ -139,7 +161,7 @@ const Graph1 = () => {
 // Trigger the data transfer when the component mounts
     useEffect(() => {
         handleDataTransformation();
-    }, [graphData]); // Empty dependency array if you want the effect to run only once
+    }, [graphData]);
 
     useEffect(() => {
         // Simulate data fetching with a delay
@@ -162,7 +184,6 @@ const Graph1 = () => {
     const handleOutsideClick = () => {
         setShowTooltip(false);
         setCurrentNode(null);
-        setCurrentLink(null);
     };
 
     /**
@@ -192,7 +213,6 @@ const Graph1 = () => {
         } else {
             setShowTooltip(true);
             setCurrentNode(nodeId);
-            setCurrentLink(null); // Reset currentLink when a node is clicked
             setTooltipPosition({ x: clientX, y: clientY });
         }
     };

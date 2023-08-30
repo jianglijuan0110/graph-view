@@ -32,19 +32,65 @@ const Graph4 = () => {
         links: [],
     });
 
-    // State variables
+// State variables
+    /**
+     * Represents the transformed data for the graph.
+     * @type {Object|null}
+     */
     const [transformedData, setTransformedData] = useState(null);
+
+    /**
+     * Determines whether the tooltip should be displayed.
+     * @type {boolean}
+     */
     const [showTooltip, setShowTooltip] = useState(false);
+
+    /**
+     * Represents the currently selected node for displaying tooltip.
+     * @type {Object|null}
+     */
     const [currentNode, setCurrentNode] = useState(null);
-    const [currentLink, setCurrentLink] = useState(null);
+
+    /**
+     * Stores the position coordinates (x, y) for displaying the tooltip.
+     * @type {{ x: number, y: number }}
+     */
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
+
+    /**
+     * Holds a list of criteria extracted from rdf:type relationships.
+     * @type {string[]}
+     */
+    const [criteriaList, setCriteriaList] = useState([]);
+
+    /**
+     * Represents the selected color for a criteria.
+     * @type {string}
+     */
     const [selectedColor, setSelectedColor] = useState('');
+
+    /**
+     * Represents the currently selected criteria.
+     * @type {string}
+     */
     const [selectedCriteria, setSelectedCriteria] = useState('');
 
-    // Refs
+// Refs
+    /**
+     * Ref to the graph element in the DOM.
+     * @type {React.RefObject}
+     */
     const graphRef = useRef(null);
+
+    /**
+     * Ref to the node element in the DOM that the popover tooltip is attached to.
+     * @type {React.RefObject}
+     */
     const popoverNodeRef = useRef(null);
+
+
+
 
 
     /**
@@ -65,10 +111,22 @@ const Graph4 = () => {
         }
     };
 
+    /**
+     * Checks if a given link represents an 'rdf:type' relationship.
+     *
+     * @param {Object} link - The link object to check.
+     * @returns {boolean} Returns true if the link represents an 'rdf:type' relationship, otherwise false.
+     */
     const isTypeRdf = link => {
         return link.label === 'rdf:type';
     };
 
+    /**
+     * Retrieves the rdf:type of a given node from the graph data.
+     *
+     * @param {Object} node - The node for which to retrieve the rdf:type.
+     * @returns {string|null} Returns the rdf:type of the node if found, or null if not found.
+     */
     const getRdfType = node => {
         // Find the link with label 'rdf:type' that has the current node as source
         const rdfTypeLink = graphData.links.find(link => link.source === node.id && isTypeRdf(link));
@@ -81,9 +139,12 @@ const Graph4 = () => {
         return null; // If no type is found for the node
     };
 
-
-    const [criteriaList, setCriteriaList] = useState([]);
-
+    /**
+     * Extracts criteria list based on rdf:type relationships from the graph data.
+     *
+     * @param {Object} graphData - The graph data containing nodes and links.
+     * @returns {void}
+     */
     useEffect(() => {
         if (graphData) {
             const nodesByType = {};
@@ -107,7 +168,6 @@ const Graph4 = () => {
 
 
 
-
     /**
      * Handles the color change event and updates the selected color state.
      *
@@ -116,7 +176,6 @@ const Graph4 = () => {
      */
     const handleColorChange = (newColorCode) => {
         setSelectedColor(newColorCode);
-        // console.log("Selected Color :", newColorCode);
         handleDataTransformation();
     };
 
@@ -128,7 +187,6 @@ const Graph4 = () => {
      */
     const handleCriteriaChange = (newCriteria) => {
         setSelectedCriteria(newCriteria);
-        //console.log("Selected Criteria:", newCriteria);
     };
 
     /**
@@ -223,7 +281,6 @@ const Graph4 = () => {
     const handleOutsideClick = () => {
         setShowTooltip(false);
         setCurrentNode(null);
-        setCurrentLink(null);
     };
 
     // Hide popovers when clicking outside the graph
@@ -251,7 +308,6 @@ const Graph4 = () => {
         } else {
             setShowTooltip(true);
             setCurrentNode(nodeId);
-            setCurrentLink(null); // Reset currentLink when a node is clicked
             setTooltipPosition({ x: clientX, y: clientY });
         }
     };

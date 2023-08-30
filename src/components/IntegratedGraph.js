@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Graph1 from './Graph1.js';
 import Graph2 from './Graph2.js';
 import Graph3 from './Graph3.js';
-import Graph4 from "./Graph4";
+import Graph4 from "./Graph4.js";
 
 /**
  * Component representing an integrated graph.
@@ -38,6 +38,12 @@ const IntegratedGraph = () => {
     const handleToggleGraph3 = () => {
         setShowGraph(3);
     };
+
+    /**
+     * Handle toggle graph 4 event.
+     * Sets showGraph state to 4.
+     * @returns {void}
+     */
     const handleToggleGraph4 = () => {
         setShowGraph(4);
     };

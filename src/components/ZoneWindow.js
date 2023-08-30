@@ -20,8 +20,6 @@ const colorList = [
     { code: '#FFC0CB', name: 'Pink' }
 ];
 
-
-
 /**
  * ZoneWindow component for displaying file upload, criteria selection, and color selection.
  *
@@ -30,8 +28,10 @@ const colorList = [
  * @param {Function} props.handleFileUpload - Function to handle file uploads.
  * @param {Function} props.handleColorChange - Function to handle color changes.
  * @param {Function} props.handleCriteriaChange - Function to handle criteria changes.
+ * @param {Array<string>} props.criteriaList - List of available criteria.
  * @returns {JSX.Element} ZoneWindow component JSX element.
  */
+
 const ZoneWindow = ({ handleFileUpload, handleColorChange, handleCriteriaChange, criteriaList}) => {
 
     /**

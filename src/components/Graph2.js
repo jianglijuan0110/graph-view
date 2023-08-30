@@ -31,16 +31,49 @@ const Graph2 = () => {
         links: [],
     });
 
-    // State variables
+// State variables
+    /**
+     * Represents the transformed data for the graph.
+     * @type {Object|null}
+     */
     const [transformedData, setTransformedData] = useState(null);
+
+    /**
+     * Determines whether the tooltip should be displayed.
+     * @type {boolean}
+     */
     const [showTooltip, setShowTooltip] = useState(false);
+
+    /**
+     * Represents the currently selected node for displaying tooltip.
+     * @type {Object|null}
+     */
     const [currentNode, setCurrentNode] = useState(null);
-    const [currentLink, setCurrentLink] = useState(null);
+
+    /**
+     * Stores the position coordinates (x, y) for displaying the tooltip.
+     * @type {{ x: number, y: number }}
+     */
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-    // Refs
+// Refs
+    /**
+     * Ref to the graph element in the DOM.
+     * @type {React.RefObject}
+     */
     const graphRef = useRef(null);
+
+    /**
+     * Ref to the node element in the DOM that the popover tooltip is attached to.
+     * @type {React.RefObject}
+     */
     const popoverNodeRef = useRef(null);
+
+    /**
+     * An array containing predefined color codes for visual elements.
+     * These colors can be used for representing various data elements in the UI.
+     * @type {string[]}
+     */
     const colorData = [
         '#0000FF', // Blue
         '#008000', // Green
@@ -54,6 +87,7 @@ const Graph2 = () => {
         '#FFC0CB'  // Pink
     ];
 
+
     /**
      * Get a set of nodes that can be reached in the graph.
      *
@@ -65,7 +99,7 @@ const Graph2 = () => {
         const targetRdfTypeNodes = getNodeTargetRdf(graphData); // Get 'rdf:type' target nodes
         const nodesLiterals = getNodeLiterals(graphData, sourceNodes, targetRdfTypeNodes); // Get literal nodes
         const nodesIsolated = getNodeIsolated(graphData);
-        const reachableNodes = new Set([...sourceNodes, ...targetRdfTypeNodes, ...nodesIsolated]); // Initialize with source and target nodes
+        const reachableNodes = new Set([...sourceNodes, ...targetRdfTypeNodes, ...nodesIsolated]); // Initialize with source, target RDF type nodes, and isolated nodes
 
         graphData.nodes.forEach(node => {
             if (!reachableNodes.has(node.id) && !nodesLiterals.has(node.id)) {
@@ -86,7 +120,6 @@ const Graph2 = () => {
     const handleDataTransformation = () => {
         const updatedNodes = [];
         const updatedLinks = [];
-        const sourceNodes = getSourceNodes(graphData);
         const nodesForTransformation = getReachableNodes(graphData);
 
         const colorMap = new Map(); // Store assigned colors for each node ID
@@ -95,7 +128,7 @@ const Graph2 = () => {
         if (graphData) {
             // Process each node in the graph data
             for (const node of graphData.nodes) {
-                // Check if the node's ID is in sourceNodes
+                // Check if the node's ID is present in nodesForTransformation
                 if (nodesForTransformation.has(node.id)) {
                     updatedNodes.push(node);
 
@@ -124,7 +157,7 @@ const Graph2 = () => {
 
         // Process links in the graph data
         for (const link of graphData.links) {
-            // Check if both source and target nodes are in sourceNodes
+            // Check if both source and target nodes are in nodesForTransformation
             if (nodesForTransformation.has(link.source) && nodesForTransformation.has(link.target)) {
                 updatedLinks.push(link);
             }
@@ -165,7 +198,6 @@ const Graph2 = () => {
     const handleOutsideClick = () => {
         setShowTooltip(false);
         setCurrentNode(null);
-        setCurrentLink(null);
     };
 
     // Hide popovers when clicking outside the graph
@@ -193,7 +225,6 @@ const Graph2 = () => {
         } else {
             setShowTooltip(true);
             setCurrentNode(nodeId);
-            setCurrentLink(null); // Reset currentLink when a node is clicked
             setTooltipPosition({ x: clientX, y: clientY });
         }
     };
@@ -221,17 +252,17 @@ const Graph2 = () => {
 
 
         /**
-         * Retrieves links that are connected to the specified currentNode and not connected to any source node.
+         * Retrieves links that are connected to the specified currentNode and not connected to any reachable source node.
          *
          * @param {Object} graphData - The graph data containing nodes and links.
          * @param {string} currentNode - The ID of the current node.
          * @returns {Array<Object>} An array of link objects connected to the currentNode.
          */
         const getConnectedLinks = (graphData, currentNode) => {
-            const sourceNodes = getReachableNodes(graphData);
+            const reachableNodes = getReachableNodes(graphData);
 
             return graphData.links.filter(link =>
-                link.source === currentNode && !sourceNodes.has(link.target)
+                link.source === currentNode && !reachableNodes.has(link.target)
             );
         };
 
@@ -254,9 +285,6 @@ const Graph2 = () => {
             });
 
             return connectedLabels.filter(label => label !== null);
-            // console.log("connecteNodeId", connectedNodeIds);
-
-            // console.log("connectedLabels", connectedLabels);
         };
 
         /**
