@@ -7,21 +7,28 @@ This project offers an interface for visualizing RDF property graphs using the r
 - [React-d3-graph](https://danielcaldas.github.io/react-d3-graph/docs/)
 - [react-bootstrap](https://react-bootstrap.github.io/docs/components/accordion/)
 
-    
-    
+## 🛠️ Create a new React app
 
-## 🛠️ Install Dependencies    
 
 ```bash
-npx create-react-app graph-view 
+npx create-react-app graph-view  
 ```
 
 ```bash
 cd graph-view 
 ```
+## 🛠️ Download
 
 ```bash
-npm install d3@5.5.0 
+git clone https://github.com/jianglijuan0110/graph-view.git
+```
+
+## 🛠️ Install Dependencies    
+
+
+
+```bash
+npm install d3@5.5.0  # if you don't have d3 already
 ```
 
 ```bash
@@ -39,4 +46,26 @@ npm install react-draggable --force
 ```bash
 npm start
 ```
+## 🛠️ Documentation in HTML format
+```bash
+sudo npm install -g jsdoc
+```
+```bash
+jsdoc src/**/*.js -d docs
+```
+
+## 🛠️ Documentation in Markdown format
+```bash
+sudo npm install documentation --force
+
+```
+
+```bash
+npx documentation build src/**/*.js -f md -o docs.md
+
+```
+
+## Perspective
+- Export the graph as an image
+
         

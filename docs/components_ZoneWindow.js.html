@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/ZoneWindow.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/ZoneWindow.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import Draggable from 'react-draggable';
+import '../styles/ZoneWindow.css';
+
+/**
+ * List of predefined colors with their corresponding codes and names.
+ * @type {Array&lt;Object>}
+ */
+
+const colorList = [
+    { code: '#0000FF', name: 'Blue' },
+    { code: '#008000', name: 'Green' },
+    { code: '#FF0000', name: 'Red' },
+    { code: '#FFA500', name: 'Orange' },
+    { code: '#800080', name: 'Purple' },
+    { code: '#00FFFF', name: 'Cyan' },
+    { code: '#FF00FF', name: 'Magenta' },
+    { code: '#FFFF00', name: 'Yellow' },
+    { code: '#808080', name: 'Gray' },
+    { code: '#FFC0CB', name: 'Pink' }
+];
+
+/**
+ * ZoneWindow component for displaying file upload, criteria selection, and color selection.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {Function} props.handleFileUpload - Function to handle file uploads.
+ * @param {Function} props.handleColorChange - Function to handle color changes.
+ * @param {Function} props.handleCriteriaChange - Function to handle criteria changes.
+ * @param {Array&lt;string>} props.criteriaList - List of available criteria.
+ * @returns {JSX.Element} ZoneWindow component JSX element.
+ */
+
+const ZoneWindow = ({ handleFileUpload, handleColorChange, handleCriteriaChange, criteriaList}) => {
+
+    /**
+     * Handles local file upload event.
+     *
+     * @function
+     * @param {Event} event - File upload event.
+     * @returns {void}
+     */
+    const handleLocalFileUpload = (event) => {
+        const uploadedFile = event.target.files[0];
+        handleFileUpload(uploadedFile);
+    };
+
+    /**
+     * Handles color change event.
+     *
+     * @function
+     * @param {Event} event - Color change event.
+     * @returns {void}
+     */
+    const handleColorChangeInternal = (event) => {
+        const selectedColorCode = event.target.value;
+        const selectedColor = colorList.find(color => color.code === selectedColorCode);
+
+        if (selectedColor) {
+            // Valid color code
+            handleColorChange(selectedColorCode);
+        } else {
+            console.log("Selected color not found in colorList");
+        }
+    };
+
+
+    /**
+     * Handles criteria change event.
+     *
+     * @function
+     * @param {Event} event - Criteria change event.
+     * @returns {void}
+     */
+    const handleCriteriaChangeInternal = (event) => {
+        const selectedCriteria = event.target.value;
+        handleCriteriaChange(selectedCriteria);
+    };
+
+
+    return (
+        &lt;Draggable>
+            &lt;div className="zone-window">
+
+                &lt;h3>File Upload:&lt;/h3>
+                &lt;div className="input-group mb-3">
+                    &lt;input
+                        type="file"
+                        className="form-control"
+                        id="inputGroupFile02"
+                        onChange={handleLocalFileUpload}
+                    />
+                    &lt;label className="input-group-text" htmlFor="inputGroupFile02">
+                        Choose File
+                    &lt;/label>
+                &lt;/div>
+
+
+                &lt;h3>Criteria:&lt;/h3>
+                {criteriaList.length > 0 ? (
+                    &lt;select
+                        className="form-select form-select-sm"
+                        onChange={handleCriteriaChangeInternal}
+                        aria-label=".form-select-sm example"
+                    >
+                        &lt;option value="">Open this select menu&lt;/option>
+                        {criteriaList.map((criteria) => (
+                            &lt;option key={criteria} value={criteria}>
+                                {criteria}
+                            &lt;/option>
+                        ))}
+                    &lt;/select>
+                ) : (
+                    &lt;p>No criteria available&lt;/p>
+                )}
+
+                &lt;h3>Zone Colors:&lt;/h3>
+                &lt;select
+                    className="form-select form-select-sm"
+                    onChange={handleColorChangeInternal}
+                    aria-label=".form-select-sm example"
+                >
+                    &lt;option value="">Open this select menu&lt;/option>
+                    {colorList.map((color) => {
+                        // console.log(`Color Code: ${color.code}, Color Name: ${color.name}`);
+                        return (
+                            &lt;option key={color.code} value={color.code}>
+                                {color.name}
+                            &lt;/option>
+                        );
+                    })}
+                &lt;/select>
+
+            &lt;/div>
+        &lt;/Draggable>
+    );
+};
+
+
+export default ZoneWindow;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Graph1">Graph1</a></li><li><a href="global.html#Graph2">Graph2</a></li><li><a href="global.html#Graph3">Graph3</a></li><li><a href="global.html#Graph4">Graph4</a></li><li><a href="global.html#IntegratedGraph">IntegratedGraph</a></li><li><a href="global.html#ZoneWindow">ZoneWindow</a></li><li><a href="global.html#colorList">colorList</a></li><li><a href="global.html#getNodeIsolated">getNodeIsolated</a></li><li><a href="global.html#getNodeLiterals">getNodeLiterals</a></li><li><a href="global.html#getNodeTargetRdf">getNodeTargetRdf</a></li><li><a href="global.html#getSourceNodes">getSourceNodes</a></li><li><a href="global.html#splitLabel">splitLabel</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Aug 31 2023 14:14:22 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
