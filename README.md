@@ -75,6 +75,7 @@ npx documentation build src/**/*.js -f md -o docs.md
 
 ## Compatibility and Security Advisory
 - Compatibility with the Google Chrome Web Browser
+- Developed with macOS
 - Security Risks Exist
 
 
