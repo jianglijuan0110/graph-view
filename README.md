@@ -73,4 +73,9 @@ npx documentation build src/**/*.js -f md -o docs.md
 ## Perspective
 - Export the graph as an image
 
+## Compatibility and Security Advisory
+- Compatibility with the Google Chrome Web Browser
+- Security Risks Exist
+
+
         
