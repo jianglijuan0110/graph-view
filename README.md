@@ -13,22 +13,27 @@ This project offers an interface for visualizing RDF property graphs using the r
 ```bash
 npx create-react-app graph-view  
 ```
-
 ```bash
 cd graph-view 
 ```
+
 ## 🛠️ Download
 
 ```bash
 git clone https://github.com/jianglijuan0110/graph-view.git
 ```
+```bash
+cd graph-view 
+```
+## 🛠️ Install Node.js
+- https://nodejs.org/fr
 
 ## 🛠️ Install Dependencies    
 
 
 
 ```bash
-npm install d3@5.5.0  # if you don't have d3 already
+npm install d3@5.5.0  --force
 ```
 
 ```bash
