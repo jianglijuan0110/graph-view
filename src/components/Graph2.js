@@ -5,6 +5,14 @@ import graphConfig from "../data/graph2Config"
 import '../styles/Graph.css';
 import { Popover } from "react-bootstrap";
 
+
+//import graphData from "../data/kg_2";
+//import graphConfig from "../data/graph1Config";
+
+
+//import graphData from "../data/kg_3";
+//import graphConfig from "../data/graph1Config";
+
 import {
     splitLabel,
     getNodeIsolated,
@@ -266,6 +274,7 @@ const Graph2 = () => {
             );
         };
 
+
         /**
          * Retrieves labels of connected nodes based on the given link and graph data.
          *
@@ -337,17 +346,17 @@ const Graph2 = () => {
     return (
         <div style={{ border: '1px solid black' }}>
 
-            <div ref={graphRef} className="graph-container">
-                {transformedData && ( // Data is conditionally rendered
-                    <Graph
-                        id="Graph2"
-                        data={transformedData}
-                        config={graphConfig}
-                        onClickNode={handleNodeClick}
-                    />
-                )}
-                <RenderNodePop />
-            </div>
+        <div ref={graphRef} className="graph-container">
+            {transformedData && ( // Data is conditionally rendered
+                <Graph
+                    id="Graph2"
+                    data={transformedData}
+                    config={graphConfig}
+                    onClickNode={handleNodeClick}
+                />
+            )}
+            <RenderNodePop />
+        </div>
         </div>
     );
 };

@@ -22,6 +22,7 @@ module.exports = {
     renderLabel: true,
     //directed: showDirection,
     node: {
+
         color: 'lightgreen',
         fontColor: "black",
         fontSize: 16,
@@ -39,7 +40,7 @@ module.exports = {
         strokeColor: "none",
         strokeWidth: 1.5,
         svg: "",
-        symbolType: "circle",
+        //symbolType: "circle",
     },
     link: {
 

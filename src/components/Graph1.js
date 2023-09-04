@@ -6,6 +6,12 @@ import '../styles/Graph.css';
 //import graphData from "../data/marvel/marvel.data"
 //import graphConfig from "../data/marvel/marvel.config"
 
+//import graphData from "../data/kg_2";
+//import graphConfig from "../data/graph1Config";
+
+//import graphData from "../data/kg_3";
+//import graphConfig from "../data/graph1Config";
+
 import graphData from "../data/graphData";
 import graphConfig from "../data/graph1Config";
 
@@ -265,19 +271,19 @@ const Graph1 = () => {
     return (
         <div style={{ border: '1px solid black' }}>
 
-            <div ref={graphRef}>
-                {transformedData && (
-                    <Graph
-                        id="Graph1"
-                        data={transformedData}
-                        config={graphConfig}
-                        onClickNode={handleNodeClick}
+        <div ref={graphRef}>
+            {transformedData && (
+                <Graph
+                    id="Graph1"
+                    data={transformedData}
+                    config={graphConfig}
+                    onClickNode={handleNodeClick}
 
-                    />
-                )}
-                <RenderNodePop />
+                />
+            )}
+            <RenderNodePop />
 
-            </div>
+        </div>
         </div>
 
     );

@@ -25,7 +25,7 @@ module.exports = {
         fontSize: 16,
         fontColor: "black",
         fontWeight: "normal",
-        highlightColor: "red",
+       highlightColor: "red",
         highlightFontSize: 12,
         highlightFontWeight: "bold", //change color of node when mouse over link
     },

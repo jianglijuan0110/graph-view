@@ -123,7 +123,7 @@ const ZoneWindow = ({ handleFileUpload, handleColorChange, handleCriteriaChange,
                 >
                     <option value="">Open this select menu</option>
                     {colorList.map((color) => {
-                        // console.log(`Color Code: ${color.code}, Color Name: ${color.name}`);
+                       // console.log(`Color Code: ${color.code}, Color Name: ${color.name}`);
                         return (
                             <option key={color.code} value={color.code}>
                                 {color.name}

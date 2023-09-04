@@ -255,7 +255,7 @@ const Graph4 = () => {
         if (selectedColor && selectedCriteria && graphData) {
             handleDataTransformation();
         }
-    }, [selectedColor, selectedCriteria, graphData]);
+    }, );
 
 
 
@@ -269,7 +269,7 @@ const Graph4 = () => {
             // Clean up the setTimeout when the component is unmounted
             clearTimeout(fetchData);
         };
-    }, []);
+    }, );
 
 
 
@@ -330,7 +330,7 @@ const Graph4 = () => {
 
                 setTooltipPosition({ x: xPos, y: yPos });
             }
-        }, []);
+        }, );
 
         /**
          * Gets the links connected to the given current node.
@@ -420,8 +420,6 @@ const Graph4 = () => {
         );
     };
 
-
-    console.log(criteriaList);
     return (
 
         <div ref={graphRef}
