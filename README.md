@@ -26,6 +26,7 @@ cd graph-view
 ```
 ## 🛠️ Install Node.js
 - https://nodejs.org/fr
+- version Node.js v18.17.1 
 
 ## 🛠️ Install Dependencies    
 
